@@ -139,7 +139,7 @@ const Navbar = () => {
     if (isAdmin) return getAdminNavLinks();
     if (isEmployee) return getEmployeeNavLinks();
     if (isCustomer) return getCustomerNavLinks();
-    return getPublicNavLinks(); // Only non-authenticated users get Home & Shop
+    return getPublicNavLinks();
   };
 
   const getDropdownItems = () => {
@@ -221,7 +221,7 @@ const Navbar = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation - Home & Shop for NON-AUTHENTICATED only */}
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               {!isAuthenticated && (
                 <>
@@ -234,7 +234,6 @@ const Navbar = () => {
                 </>
               )}
               
-              {/* For Customers - Home & Shop */}
               {isCustomer && (
                 <>
                   <Link to="/" className={`relative text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-300 font-medium py-2 ${isActive('/') ? 'text-[#FF1493]' : ''}`}>
@@ -246,10 +245,8 @@ const Navbar = () => {
                 </>
               )}
               
-              {/* For Employees - No Home/Shop in top nav (they use dropdown) */}
               {isEmployee && (
                 <>
-
                   <Link to="/employee/analytics" className={`relative text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-300 font-medium py-2 ${isActive('/employee/analytics') ? 'text-[#FF1493]' : ''}`}>
                     Analytics
                   </Link>
@@ -259,7 +256,6 @@ const Navbar = () => {
                 </>
               )}
               
-              {/* For Admins - No Home/Shop in top nav (they use dropdown) */}
               {isAdmin && (
                 <>
                   <Link to="/admin/analytics" className={`relative text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-300 font-medium py-2 ${isActive('/admin/analytics') ? 'text-[#FF1493]' : ''}`}>
@@ -424,7 +420,7 @@ const Navbar = () => {
               ) : (
                 <Link 
                   to="/login" 
-                  className="bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white px-5 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 shadow-md"
+                  className="bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 shadow-md"
                 >
                   Sign In
                 </Link>
