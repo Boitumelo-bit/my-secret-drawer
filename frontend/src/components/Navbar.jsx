@@ -28,6 +28,7 @@ import {
   ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import NotificationBell from './NotificationBell';
+import GlobalSearch from './GlobalSearch';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, isAdmin, isEmployee, isCustomer } = useAuth();
@@ -274,9 +275,8 @@ const Navbar = () => {
             <div className="flex items-center gap-1 md:gap-2">
               <NotificationBell />
               
-              <button className="text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-200 p-2 rounded-full hover:bg-pink-50 active:scale-95">
-                <MagnifyingGlassIcon className="w-5 h-5" />
-              </button>
+              {/* REPLACED: GlobalSearch component */}
+              <GlobalSearch />
               
               {showWishlist && (
                 <button 

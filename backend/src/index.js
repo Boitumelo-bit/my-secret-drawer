@@ -96,6 +96,7 @@ const refundRoutes = require('./routes/refundRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 // Use routes
 app.use('/api/auth', authRoutes);
@@ -112,6 +113,7 @@ app.use('/api/refunds', refundRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/search', searchRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
