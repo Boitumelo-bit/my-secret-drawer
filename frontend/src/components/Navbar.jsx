@@ -25,8 +25,7 @@ import {
   TruckIcon,
   DocumentTextIcon,
   CubeIcon,
-  ShoppingBagIcon,
-  UserPlusIcon
+  ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import NotificationBell from './NotificationBell';
 
@@ -37,6 +36,7 @@ const Navbar = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isWishlistDrawerOpen, setIsWishlistDrawerOpen] = useState(false);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
 
   useEffect(() => {
@@ -127,7 +127,7 @@ const Navbar = () => {
     ];
   };
 
-  // ============ PUBLIC NAVIGATION FOR NON-AUTHENTICATED USERS ============
+  // ============ PUBLIC NAVIGATION FOR NON-AUTHENTICATED USERS ONLY ============
   const getPublicNavLinks = () => {
     return [
       { name: 'Home', path: '/' },
@@ -145,11 +145,12 @@ const Navbar = () => {
   const getDropdownItems = () => {
     if (isAdmin) return getAdminDropdownItems();
     if (isEmployee) return getEmployeeDropdownItems();
+    // Customer dropdown - NOW INCLUDES WISHLIST
     return [
       { name: 'My Dashboard', path: '/dashboard', icon: ChartBarIcon },
       { name: 'My Orders', path: '/orders', icon: ClipboardDocumentListIcon },
-      { name: 'My Wishlist', path: '/wishlist', icon: HeartIcon, badge: wishlistCount },
       { name: 'Profile & Addresses', path: '/account', icon: UserIcon },
+      { name: 'My Wishlist', path: '/wishlist', icon: HeartIcon, badge: wishlistCount },
       { divider: true },
       { name: 'Sign Out', path: '#', icon: ArrowPathIcon, isLogout: true },
     ];
@@ -158,6 +159,9 @@ const Navbar = () => {
   const navLinks = getNavLinks();
   const dropdownItems = getDropdownItems();
   const showCart = isCustomer;
+  // Wishlist icon removed from navbar for customers
+  const showWishlist = false; // Changed to false - removed from navbar
+  const showShoppingFeatures = isCustomer;
 
   const isActive = (path) => location.pathname === path;
 
@@ -172,6 +176,7 @@ const Navbar = () => {
     return <UserCircleIcon className="w-5 h-5" />;
   };
 
+  const wishlistAriaLabel = `Wishlist${wishlistCount > 0 ? ` with ${wishlistCount} ${wishlistCount === 1 ? 'item' : 'items'}` : ''}`;
   const cartAriaLabel = `Cart${cartCount > 0 ? ` with ${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : ''}`;
 
   const groupedDropdownItems = (items) => {
@@ -196,19 +201,6 @@ const Navbar = () => {
   };
 
   const adminDropdownGroups = isAdmin ? groupedDropdownItems(dropdownItems) : null;
-
-  // Mobile menu items (includes Wishlist)
-  const mobileMenuItems = [
-    ...navLinks,
-    { divider: true },
-    { name: 'Dashboard', path: getDashboardLink(), icon: ChartBarIcon },
-    { name: 'My Orders', path: '/orders', icon: ClipboardDocumentListIcon },
-    { name: 'My Wishlist', path: '/wishlist', icon: HeartIcon, badge: wishlistCount },
-    { name: 'Profile', path: '/account', icon: UserIcon },
-    { divider: true },
-    { name: 'Notifications', path: '#', icon: 'bell', isNotification: true },
-    { divider: true },
-  ];
 
   return (
     <>
@@ -280,14 +272,15 @@ const Navbar = () => {
             </div>
 
             {/* Desktop Icons */}
-            <div className="hidden md:flex items-center gap-1 md:gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
               <NotificationBell />
               
               <button className="text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-200 p-2 rounded-full hover:bg-pink-50 active:scale-95">
                 <MagnifyingGlassIcon className="w-5 h-5" />
               </button>
               
-              {/* Cart - Only for Customers */}
+              {/* Wishlist icon REMOVED for customers - stays visible for other roles? No, only customers had it, so removed entirely */}
+              
               {showCart && (
                 <button 
                   onClick={() => setIsCartDrawerOpen(true)}
@@ -387,7 +380,7 @@ const Navbar = () => {
                           )
                         ))
                       ) : (
-                        // CUSTOMER DROPDOWN - Includes Wishlist
+                        // CUSTOMER DROPDOWN - Now includes Wishlist
                         dropdownItems.map((item) => (
                           item.isLogout ? (
                             <button
@@ -430,29 +423,11 @@ const Navbar = () => {
                   Sign In
                 </Link>
               )}
-            </div>
 
-            {/* Mobile Icons - Only Logo, Cart, and 3-dots Menu */}
-            <div className="flex md:hidden items-center gap-2">
-              {/* Cart - Only for Customers */}
-              {showCart && (
-                <button 
-                  onClick={() => setIsCartDrawerOpen(true)}
-                  className="relative text-[#1A1A1A] p-2 rounded-full active:scale-95"
-                >
-                  <ShoppingCartIcon className="w-5 h-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
-              )}
-              
-              {/* Mobile Menu Button (3-dots) */}
+              {/* Mobile Menu Button */}
               <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-                className="text-[#1A1A1A] p-2 rounded-xl hover:bg-pink-50 transition-all duration-200 active:scale-95"
+                className="md:hidden text-[#1A1A1A] p-2 rounded-xl hover:bg-pink-50 transition-all duration-200 active:scale-95"
                 aria-label="Menu"
               >
                 {isMobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
@@ -460,27 +435,16 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Menu Drawer - Contains all options */}
+          {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="md:hidden mt-4 pb-6 border-t border-gray-100 pt-4 animate-slide-down max-h-[80vh] overflow-y-auto">
-              {/* Search Bar */}
-              <div className="relative mb-4 px-2">
-                <MagnifyingGlassIcon className="absolute left-5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#FF1493]/20"
-                />
-              </div>
-              
-              {/* Navigation Links */}
+            <div className="md:hidden mt-4 pb-6 border-t border-gray-100 pt-4 animate-slide-down">
               <div className="flex flex-col space-y-1">
                 {navLinks.map((item) => (
                   <Link
                     key={item.name}
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200"
+                    className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200 active:scale-98"
                   >
                     {item.name === 'Home' && <HomeIcon className="w-5 h-5" />}
                     {item.name === 'Shop' && <ShoppingBagIcon className="w-5 h-5" />}
@@ -493,92 +457,45 @@ const Navbar = () => {
                 
                 <div className="border-t border-gray-100 my-3"></div>
                 
-                {isAuthenticated ? (
-                  <>
+                <p className="text-xs text-gray-400 px-4 pt-2 font-medium">MENU</p>
+                {dropdownItems.slice(0, isAdmin || isEmployee ? -1 : dropdownItems.length).map((item) => (
+                  item.isLogout ? null : item.divider ? (
+                    <div key={`mobile-divider-${item.name}`} className="border-t border-gray-100 my-2"></div>
+                  ) : (
                     <Link
-                      to={getDashboardLink()}
+                      key={item.name}
+                      to={item.path}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200"
                     >
-                      <ChartBarIcon className="w-5 h-5" />
-                      <span className="font-medium">Dashboard</span>
-                    </Link>
-                    <Link
-                      to="/orders"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200"
-                    >
-                      <ClipboardDocumentListIcon className="w-5 h-5" />
-                      <span className="font-medium">My Orders</span>
-                    </Link>
-                    <Link
-                      to="/wishlist"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200"
-                    >
-                      <HeartIcon className="w-5 h-5" />
-                      <span className="font-medium">My Wishlist</span>
-                      {wishlistCount > 0 && (
-                        <span className="ml-auto bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-xs font-bold rounded-full px-2 py-0.5">
-                          {wishlistCount}
+                      <item.icon className="w-5 h-5" />
+                      <span className="font-medium">{item.name}</span>
+                      {item.badge && (
+                        <span className="ml-auto bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-xs font-bold rounded-full px-2 py-0.5 shadow-sm">
+                          {item.badge}
                         </span>
                       )}
                     </Link>
-                    <Link
-                      to="/account"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200"
-                    >
-                      <UserIcon className="w-5 h-5" />
-                      <span className="font-medium">Profile & Addresses</span>
-                    </Link>
-                    
-                    <div className="border-t border-gray-100 my-3"></div>
-                    
-                    {/* Notifications in mobile menu */}
-                    <div className="flex items-center justify-between py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <span>🔔</span>
-                        <span className="font-medium">Notifications</span>
-                      </div>
-                      <NotificationBell />
-                    </div>
-                    
-                    <div className="border-t border-gray-100 my-3"></div>
-                    
-                    <button
-                      onClick={() => { logout(); setIsMobileMenuOpen(false); }}
-                      className="flex items-center gap-3 text-red-600 hover:bg-red-50 py-3 px-4 rounded-xl transition-all duration-200 font-medium"
-                    >
-                      <ArrowPathIcon className="w-5 h-5" />
-                      <span>Sign Out</span>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200"
-                    >
-                      <UserCircleIcon className="w-5 h-5" />
-                      <span className="font-medium">Sign In</span>
-                    </Link>
-                    <Link
-                      to="/register"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-[#1A1A1A] hover:text-[#FF1493] py-3 px-4 rounded-xl hover:bg-pink-50 transition-all duration-200"
-                    >
-                      <UserPlusIcon className="w-5 h-5" />
-                      <span className="font-medium">Create Account</span>
-                    </Link>
-                  </>
-                )}
+                  )
+                ))}
+                
+                <div className="border-t border-gray-100 my-3"></div>
+                
+                <button
+                  onClick={() => { logout(); setIsMobileMenuOpen(false); }}
+                  className="flex items-center gap-3 text-red-600 hover:bg-red-50 py-3 px-4 rounded-xl transition-all duration-200 font-medium"
+                >
+                  <ArrowPathIcon className="w-5 h-5" />
+                  <span>Sign Out</span>
+                </button>
               </div>
             </div>
           )}
         </div>
       </nav>
+
+      {/* Wishlist Drawer - Removed since Wishlist icon is gone from navbar */}
+      {/* Wishlist is now only accessible via dropdown menu */}
 
       {/* Cart Drawer */}
       {isCartDrawerOpen && showCart && (
@@ -652,6 +569,9 @@ const Navbar = () => {
         }
         .animate-fade-in {
           animation: fade-in 0.2s ease-out;
+        }
+        .active\\:scale-98:active {
+          transform: scale(0.98);
         }
       `}</style>
     </>
