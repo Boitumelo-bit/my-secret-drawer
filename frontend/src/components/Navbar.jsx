@@ -145,7 +145,7 @@ const Navbar = () => {
   const getDropdownItems = () => {
     if (isAdmin) return getAdminDropdownItems();
     if (isEmployee) return getEmployeeDropdownItems();
-    // Customer dropdown - includes Wishlist (only entry, not in navbar)
+    // Customer dropdown - includes all items
     return [
       { name: 'My Dashboard', path: '/dashboard', icon: ChartBarIcon },
       { name: 'My Orders', path: '/orders', icon: ClipboardDocumentListIcon },
@@ -159,8 +159,7 @@ const Navbar = () => {
   const navLinks = getNavLinks();
   const dropdownItems = getDropdownItems();
   const showCart = isCustomer;
-  // Wishlist icon removed from navbar for customers - only in dropdown
-  const showWishlistIcon = false; // Always false - removed from navbar
+  const showWishlist = isCustomer;
   const showShoppingFeatures = isCustomer;
 
   const isActive = (path) => location.pathname === path;
@@ -176,6 +175,7 @@ const Navbar = () => {
     return <UserCircleIcon className="w-5 h-5" />;
   };
 
+  const wishlistAriaLabel = `Wishlist${wishlistCount > 0 ? ` with ${wishlistCount} ${wishlistCount === 1 ? 'item' : 'items'}` : ''}`;
   const cartAriaLabel = `Cart${cartCount > 0 ? ` with ${cartCount} ${cartCount === 1 ? 'item' : 'items'}` : ''}`;
 
   const groupedDropdownItems = (items) => {
@@ -278,7 +278,20 @@ const Navbar = () => {
                 <MagnifyingGlassIcon className="w-5 h-5" />
               </button>
               
-              {/* Wishlist icon REMOVED from navbar for customers - only in dropdown */}
+              {showWishlist && (
+                <button 
+                  onClick={() => setIsWishlistDrawerOpen(true)}
+                  className="relative text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-200 p-2 rounded-full hover:bg-pink-50 active:scale-95"
+                  aria-label={wishlistAriaLabel}
+                >
+                  <HeartIcon className="w-5 h-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shadow-sm">
+                      {wishlistCount > 99 ? '99+' : wishlistCount}
+                    </span>
+                  )}
+                </button>
+              )}
               
               {showCart && (
                 <button 
@@ -295,125 +308,121 @@ const Navbar = () => {
                 </button>
               )}
               
-              {/* User Menu */}
+              {/* User Menu - CONDITIONALLY SHOWN: NOT for customers */}
+              {/* For customers, the profile icon is REMOVED */}
               {isAuthenticated ? (
-                <div className="relative group">
-                  <button className="flex items-center gap-1 text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-200 p-1.5 rounded-full hover:bg-pink-50 active:scale-95">
-                    {getDropdownIcon()}
-                    <span className="text-sm font-medium hidden lg:inline ml-1">
-                      {getDropdownName()}
-                      {getRoleBadge()}
-                    </span>
-                    <ChevronDownIcon className="w-4 h-4 hidden lg:block text-gray-400 group-hover:text-[#FF1493] transition-all duration-200" />
-                  </button>
-                  
-                  {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 overflow-hidden">
-                    <div className="py-2 max-h-96 overflow-y-auto">
-                      {isAdmin ? (
-                        adminDropdownGroups.map((group, groupIdx) => (
-                          <div key={groupIdx}>
-                            {group.isDivider ? (
-                              <div className="border-t border-gray-100 my-2 mx-3"></div>
+                !isCustomer && (
+                  <div className="relative group">
+                    <button className="flex items-center gap-1 text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-200 p-1.5 rounded-full hover:bg-pink-50 active:scale-95">
+                      {getDropdownIcon()}
+                      <span className="text-sm font-medium hidden lg:inline ml-1">
+                        {getDropdownName()}
+                        {getRoleBadge()}
+                      </span>
+                      <ChevronDownIcon className="w-4 h-4 hidden lg:block text-gray-400 group-hover:text-[#FF1493] transition-all duration-200" />
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 overflow-hidden">
+                      <div className="py-2 max-h-96 overflow-y-auto">
+                        {isAdmin ? (
+                          adminDropdownGroups.map((group, groupIdx) => (
+                            <div key={groupIdx}>
+                              {group.isDivider ? (
+                                <div className="border-t border-gray-100 my-2 mx-3"></div>
+                              ) : (
+                                group.map((item) => (
+                                  item.isLogout ? (
+                                    <button
+                                      key={item.name}
+                                      onClick={logout}
+                                      className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 font-medium"
+                                    >
+                                      <item.icon className="w-5 h-5" />
+                                      <span>{item.name}</span>
+                                    </button>
+                                  ) : (
+                                    <Link
+                                      key={item.name}
+                                      to={item.path}
+                                      className={`flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-pink-50 transition-all duration-200 ${isActive(item.path) ? 'bg-pink-50 text-[#FF1493] border-l-3 border-[#FF1493]' : 'text-gray-700'}`}
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <item.icon className="w-5 h-5 text-gray-400 group-hover:text-[#FF1493] transition-colors" />
+                                        <span className="font-medium">{item.name}</span>
+                                      </div>
+                                      {item.badge && (
+                                        <span className="bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center shadow-sm">
+                                          {item.badge}
+                                        </span>
+                                      )}
+                                    </Link>
+                                  )
+                                ))
+                              )}
+                            </div>
+                          ))
+                        ) : isEmployee ? (
+                          dropdownItems.map((item) => (
+                            item.isLogout ? (
+                              <button
+                                key={item.name}
+                                onClick={logout}
+                                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 font-medium"
+                              >
+                                <item.icon className="w-5 h-5" />
+                                <span>{item.name}</span>
+                              </button>
+                            ) : item.divider ? (
+                              <div key={`divider-${item.name}`} className="border-t border-gray-100 my-2 mx-3"></div>
                             ) : (
-                              group.map((item) => (
-                                item.isLogout ? (
-                                  <button
-                                    key={item.name}
-                                    onClick={logout}
-                                    className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 font-medium"
-                                  >
-                                    <item.icon className="w-5 h-5" />
-                                    <span>{item.name}</span>
-                                  </button>
-                                ) : (
-                                  <Link
-                                    key={item.name}
-                                    to={item.path}
-                                    className={`flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-pink-50 transition-all duration-200 ${isActive(item.path) ? 'bg-pink-50 text-[#FF1493] border-l-3 border-[#FF1493]' : 'text-gray-700'}`}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <item.icon className="w-5 h-5 text-gray-400 group-hover:text-[#FF1493] transition-colors" />
-                                      <span className="font-medium">{item.name}</span>
-                                    </div>
-                                    {item.badge && (
-                                      <span className="bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center shadow-sm">
-                                        {item.badge}
-                                      </span>
-                                    )}
-                                  </Link>
-                                )
-                              ))
-                            )}
-                          </div>
-                        ))
-                      ) : isEmployee ? (
-                        dropdownItems.map((item) => (
-                          item.isLogout ? (
-                            <button
-                              key={item.name}
-                              onClick={logout}
-                              className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 font-medium"
-                            >
-                              <item.icon className="w-5 h-5" />
-                              <span>{item.name}</span>
-                            </button>
-                          ) : item.divider ? (
-                            <div key={`divider-${item.name}`} className="border-t border-gray-100 my-2 mx-3"></div>
-                          ) : (
-                            <Link
-                              key={item.name}
-                              to={item.path}
-                              className={`flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-pink-50 transition-all duration-200 ${isActive(item.path) ? 'bg-pink-50 text-[#FF1493] border-l-3 border-[#FF1493]' : 'text-gray-700'}`}
-                            >
-                              <div className="flex items-center gap-3">
+                              <Link
+                                key={item.name}
+                                to={item.path}
+                                className={`flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-pink-50 transition-all duration-200 ${isActive(item.path) ? 'bg-pink-50 text-[#FF1493] border-l-3 border-[#FF1493]' : 'text-gray-700'}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <item.icon className="w-5 h-5 text-gray-400" />
+                                  <span className="font-medium">{item.name}</span>
+                                </div>
+                                {item.badge && (
+                                  <span className="bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-xs font-bold rounded-full px-2 py-0.5 shadow-sm">
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </Link>
+                            )
+                          ))
+                        ) : (
+                          // This should not render for customers since we have !isCustomer condition
+                          dropdownItems.map((item) => (
+                            item.isLogout ? (
+                              <button
+                                key={item.name}
+                                onClick={logout}
+                                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 font-medium"
+                              >
+                                <item.icon className="w-5 h-5" />
+                                <span>Sign Out</span>
+                              </button>
+                            ) : item.divider ? (
+                              <div key={`divider-${item.name}`} className="border-t border-gray-100 my-2 mx-3"></div>
+                            ) : (
+                              <Link
+                                key={item.name}
+                                to={item.path}
+                                className={`flex items-center gap-3 px-4 py-3 text-sm hover:bg-pink-50 transition-all duration-200 ${isActive(item.path) ? 'bg-pink-50 text-[#FF1493] border-l-3 border-[#FF1493]' : 'text-gray-700'}`}
+                              >
                                 <item.icon className="w-5 h-5 text-gray-400" />
                                 <span className="font-medium">{item.name}</span>
-                              </div>
-                              {item.badge && (
-                                <span className="bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-xs font-bold rounded-full px-2 py-0.5 shadow-sm">
-                                  {item.badge}
-                                </span>
-                              )}
-                            </Link>
-                          )
-                        ))
-                      ) : (
-                        // CUSTOMER DROPDOWN - Includes Wishlist (only place)
-                        dropdownItems.map((item) => (
-                          item.isLogout ? (
-                            <button
-                              key={item.name}
-                              onClick={logout}
-                              className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 font-medium"
-                            >
-                              <item.icon className="w-5 h-5" />
-                              <span>Sign Out</span>
-                            </button>
-                          ) : item.divider ? (
-                            <div key={`divider-${item.name}`} className="border-t border-gray-100 my-2 mx-3"></div>
-                          ) : (
-                            <Link
-                              key={item.name}
-                              to={item.path}
-                              className={`flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-pink-50 transition-all duration-200 ${isActive(item.path) ? 'bg-pink-50 text-[#FF1493] border-l-3 border-[#FF1493]' : 'text-gray-700'}`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <item.icon className="w-5 h-5 text-gray-400" />
-                                <span className="font-medium">{item.name}</span>
-                              </div>
-                              {item.badge > 0 && (
-                                <span className="bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-xs font-bold rounded-full px-2 py-0.5 min-w-[20px] text-center shadow-sm">
-                                  {item.badge}
-                                </span>
-                              )}
-                            </Link>
-                          )
-                        ))
-                      )}
+                              </Link>
+                            )
+                          ))
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )
               ) : (
                 <Link 
                   to="/login" 
@@ -434,7 +443,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu - Contains dropdown items for customers */}
           {isMobileMenuOpen && (
             <div className="md:hidden mt-4 pb-6 border-t border-gray-100 pt-4 animate-slide-down">
               <div className="flex flex-col space-y-1">
@@ -492,6 +501,51 @@ const Navbar = () => {
           )}
         </div>
       </nav>
+
+      {/* Wishlist Drawer */}
+      {isWishlistDrawerOpen && showWishlist && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-end animate-fade-in">
+          <div className="bg-white w-full max-w-md h-full overflow-y-auto animate-slide-in-right shadow-2xl">
+            <div className="p-5 border-b flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-sm z-10">
+              <h2 className="text-2xl font-playfair font-bold bg-gradient-to-r from-[#FF1493] to-[#FF69B4] bg-clip-text text-transparent">
+                My Wishlist ({wishlistCount} items)
+              </h2>
+              <button 
+                onClick={() => setIsWishlistDrawerOpen(false)} 
+                className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 active:scale-90"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5">
+              {wishlistCount > 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Loading your wishlist...</p>
+                  <Link 
+                    to="/wishlist" 
+                    onClick={() => setIsWishlistDrawerOpen(false)}
+                    className="block w-full bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-center py-3 rounded-xl mt-6 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 font-semibold"
+                  >
+                    View Full Wishlist
+                  </Link>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <HeartIcon className="w-20 h-20 text-gray-200 mx-auto mb-4" />
+                  <p className="text-gray-500">Your wishlist is empty</p>
+                  <Link 
+                    to="/products" 
+                    onClick={() => setIsWishlistDrawerOpen(false)}
+                    className="block w-full bg-gradient-to-r from-[#FF1493] to-[#FF69B4] text-white text-center py-3 rounded-xl mt-6 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 font-semibold"
+                  >
+                    Start Shopping
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cart Drawer */}
       {isCartDrawerOpen && showCart && (
