@@ -11,6 +11,10 @@
     "prisma:studio": "prisma studio",
     "seed": "node prisma/seed.js"
   },
+  "engines": {
+    "node": "20.18.0",
+    "npm": "10.8.0"
+  },
   "dependencies": {
     "@prisma/client": "^5.7.0",
     "bcryptjs": "^2.4.3",
