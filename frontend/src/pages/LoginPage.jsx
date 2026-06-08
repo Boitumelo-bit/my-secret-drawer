@@ -23,59 +23,70 @@ const LoginPage = () => {
     setLoading(false);
   };
 
-  // Google Login
+  // Google Login - FIXED: Use window.location for reliable redirect
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
       const result = await signInWithGoogle();
       console.log('Google result:', result);
 
-      if (result.success) {
+      if (result.success && result.user) {
+        toast.success(`Welcome, ${result.user.name || result.user.email}!`);
+        
+        // Determine redirect path
         let redirectPath = '/dashboard';
-
-        if (result.user?.role === 'ADMIN') {
+        if (result.user.role === 'ADMIN') {
           redirectPath = '/admin/dashboard';
-        } else if (result.user?.role === 'EMPLOYEE') {
+        } else if (result.user.role === 'EMPLOYEE') {
           redirectPath = '/employee/dashboard';
         }
-
-        toast.success(`Welcome, ${result.user?.name || result.user?.email}!`);
-        navigate(redirectPath);
+        
+        // Use window.location for guaranteed redirect
+        window.location.href = redirectPath;
       } else {
-        toast.error(result.message || 'Google sign in failed');
+        // Don't show error if user cancelled the popup
+        if (!result.cancelled) {
+          toast.error(result.message || 'Google sign in failed');
+        }
       }
     } catch (error) {
       console.error('Google login error:', error);
-      toast.error('Google sign in failed');
+      if (error?.code !== 'auth/popup-closed-by-user') {
+        toast.error('Google sign in failed');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Facebook Login
+  // Facebook Login - FIXED: Use window.location for reliable redirect
   const handleFacebookLogin = async () => {
     setLoading(true);
     try {
       const result = await signInWithFacebook();
       console.log('Facebook result:', result);
 
-      if (result.success) {
+      if (result.success && result.user) {
+        toast.success(`Welcome, ${result.user.name || result.user.email}!`);
+        
         let redirectPath = '/dashboard';
-
-        if (result.user?.role === 'ADMIN') {
+        if (result.user.role === 'ADMIN') {
           redirectPath = '/admin/dashboard';
-        } else if (result.user?.role === 'EMPLOYEE') {
+        } else if (result.user.role === 'EMPLOYEE') {
           redirectPath = '/employee/dashboard';
         }
-
-        toast.success(`Welcome, ${result.user?.name || result.user?.email}!`);
-        navigate(redirectPath);
+        
+        window.location.href = redirectPath;
       } else {
-        toast.error(result.message || 'Facebook sign in failed');
+        if (!result.cancelled) {
+          toast.error(result.message || 'Facebook sign in failed');
+        }
       }
     } catch (error) {
       console.error('Facebook login error:', error);
-      toast.error('Facebook sign in failed');
+      if (error?.code !== 'auth/popup-closed-by-user') {
+        toast.error('Facebook sign in failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -231,7 +242,7 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* Forgot Password Modal - Enhanced */}
+      {/* Forgot Password Modal */}
       {showForgotPassword && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl animate-scale-up">
