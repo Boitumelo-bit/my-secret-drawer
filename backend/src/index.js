@@ -13,26 +13,40 @@ const prisma = new PrismaClient();
 
 // ============ CORS Configuration for Production ============
 const allowedOrigins = [
-  'http://localhost:5173',           // Local development
-  'http://localhost:3000',           // Alternative dev port
-  'https://mysecretdrawer.com',      // Production domain
-  'https://www.mysecretdrawer.com',  // Production with www
-  process.env.FRONTEND_URL           // From environment variable
+  'http://localhost:5173',                      // Local development
+  'http://localhost:3000',                      // Alternative dev port
+  'http://localhost:5000',                      // Backend local
+  'https://mysecretdrawer.com',                 // Production domain
+  'https://www.mysecretdrawer.com',             // Production with www
+  'https://my-secret-drawer.vercel.app',        // Vercel frontend
+  'https://my-secret-drawer-git-main-boitumelo-bits-projects.vercel.app', // Vercel preview
+  process.env.FRONTEND_URL                      // From environment variable
 ].filter(Boolean); // Remove undefined values
+
+// Allow all origins in development, restrict in production
+const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl)
+    // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
+    // In production, check against allowed origins
+    if (isProduction) {
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.warn(`❌ CORS blocked origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
     } else {
-      console.warn(`CORS blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+      // In development, allow all origins
+      callback(null, true);
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Security Middleware
