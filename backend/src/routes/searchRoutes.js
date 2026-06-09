@@ -1,43 +1,45 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Unified search endpoint - behavior changes based on user role
+// Helper function to get user role from token
+const getUserRole = async (token) => {
+  if (!token) return 'GUEST';
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { role: true }
+    });
+    return user?.role || 'GUEST';
+  } catch (error) {
+    return 'GUEST';
+  }
+};
+
+// Unified search endpoint
 router.get('/', async (req, res) => {
   try {
     const { q, limit = 20 } = req.query;
     
+    // Return empty if search term is too short
     if (!q || q.trim().length < 2) {
-      return res.json({ success: true, results: [] });
+      return res.json({ success: true, results: [], userRole: 'GUEST' });
     }
     
     const searchTerm = q.trim();
     
-    // Check authentication and role
-    let userRole = 'GUEST';
-    
+    // Get user role from token if present
     const token = req.headers.authorization?.split(' ')[1];
-    if (token) {
-      try {
-        const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await prisma.user.findUnique({
-          where: { id: decoded.userId },
-          select: { role: true }
-        });
-        if (user) {
-          userRole = user.role;
-        }
-      } catch (e) {
-        // Invalid token, treat as guest
-      }
-    }
+    const userRole = await getUserRole(token);
     
     let results = [];
     
-    // GUEST or CUSTOMER: Search PRODUCTS only
+    // CASE 1: GUEST or CUSTOMER - Search PRODUCTS only
     if (userRole === 'GUEST' || userRole === 'CUSTOMER') {
       const products = await prisma.product.findMany({
         where: {
@@ -52,21 +54,21 @@ router.get('/', async (req, res) => {
         include: { sale: true }
       });
       
-      results = products.map(p => ({
-        id: p.id,
+      results = products.map(product => ({
+        id: product.id,
         type: 'product',
-        title: p.name,
-        description: p.description?.substring(0, 100),
-        category: p.category,
-        price: p.price,
-        salePrice: p.salePrice,
-        stock: p.stock,
-        image: p.images?.[0] || null,
-        link: `/product/${p.id}`
+        title: product.name,
+        description: product.description?.substring(0, 100) || '',
+        category: product.category,
+        price: product.price,
+        salePrice: product.salePrice,
+        stock: product.stock,
+        image: product.images?.[0] || null,
+        link: `/product/${product.id}`
       }));
     }
     
-    // ADMIN or EMPLOYEE: Search ORDERS only
+    // CASE 2: ADMIN or EMPLOYEE - Search ORDERS only
     else if (userRole === 'ADMIN' || userRole === 'EMPLOYEE') {
       const orders = await prisma.order.findMany({
         where: {
@@ -74,39 +76,59 @@ router.get('/', async (req, res) => {
             { orderNumber: { contains: searchTerm, mode: 'insensitive' } },
             { user: { name: { contains: searchTerm, mode: 'insensitive' } } },
             { user: { email: { contains: searchTerm, mode: 'insensitive' } } },
-            { status: { equals: searchTerm.toUpperCase() } }
+            { status: { contains: searchTerm, mode: 'insensitive' } }
           ]
         },
         take: parseInt(limit),
         orderBy: { createdAt: 'desc' },
         include: {
           user: {
-            select: { name: true, email: true }
+            select: { 
+              id: true,
+              name: true, 
+              email: true,
+              phone: true
+            }
           },
           items: {
-            take: 2
+            take: 2,
+            include: {
+              product: {
+                select: { name: true, images: true }
+              }
+            }
           }
         }
       });
       
-      results = orders.map(o => ({
-        id: o.id,
+      results = orders.map(order => ({
+        id: order.id,
         type: 'order',
-        orderNumber: o.orderNumber,
-        customerName: o.user?.name || 'Guest',
-        customerEmail: o.user?.email,
-        total: o.total,
-        status: o.status,
-        createdAt: o.createdAt,
-        link: userRole === 'ADMIN' ? `/admin/orders/${o.id}` : `/employee/orders/${o.id}`
+        orderNumber: order.orderNumber,
+        customerName: order.user?.name || 'Guest',
+        customerEmail: order.user?.email,
+        total: order.total,
+        status: order.status,
+        createdAt: order.createdAt,
+        itemCount: order.items.length,
+        link: userRole === 'ADMIN' ? `/admin/orders/${order.id}` : `/employee/orders/${order.id}`
       }));
     }
     
-    res.json({ success: true, results, userRole });
+    res.json({ 
+      success: true, 
+      results, 
+      userRole,
+      searchTerm 
+    });
     
   } catch (error) {
     console.error('Search error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Search failed. Please try again.',
+      error: error.message 
+    });
   }
 });
 
