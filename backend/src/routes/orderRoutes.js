@@ -1,6 +1,8 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
+const emailService = require('../services/emailService');
+const { orderConfirmationEmail, adminNewOrderEmail, orderStatusUpdateEmail } = require('../services/emailTemplates');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -68,6 +70,12 @@ router.post('/', verifyToken, async (req, res) => {
       color: item.color || null
     }));
     
+    // Get user details for emails
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { name: true, email: true }
+    });
+    
     const order = await prisma.order.create({
       data: {
         userId: req.user.id,
@@ -85,6 +93,39 @@ router.post('/', verifyToken, async (req, res) => {
       },
       include: { items: { include: { product: true } } }
     });
+    
+    // Send order confirmation email to customer
+    try {
+      const itemsCount = order.items.length;
+      await emailService.sendEmail({
+        to: user.email,
+        subject: orderConfirmationEmail(user.name, orderNumber, total, itemsCount).subject,
+        html: orderConfirmationEmail(user.name, orderNumber, total, itemsCount).html
+      });
+      console.log(`Order confirmation email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error('Failed to send order confirmation email:', emailError.message);
+    }
+    
+    // Send admin notification email
+    try {
+      // Get all admin emails
+      const admins = await prisma.user.findMany({
+        where: { role: 'ADMIN', isActive: true },
+        select: { email: true }
+      });
+      
+      for (const admin of admins) {
+        await emailService.sendEmail({
+          to: admin.email,
+          subject: adminNewOrderEmail(orderNumber, user.name, total).subject,
+          html: adminNewOrderEmail(orderNumber, user.name, total).html
+        });
+      }
+      console.log(`Admin notification sent for order ${orderNumber}`);
+    } catch (emailError) {
+      console.error('Failed to send admin notification email:', emailError.message);
+    }
     
     res.status(201).json({ success: true, order });
   } catch (error) {
@@ -204,6 +245,20 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
     const { id } = req.params;
     const { status, trackingNumber } = req.body;
     
+    // Get current order status before update
+    const currentOrder = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        user: { select: { name: true, email: true } }
+      }
+    });
+    
+    if (!currentOrder) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    
+    const oldStatus = currentOrder.status;
+    
     const order = await prisma.order.update({
       where: { id },
       data: { 
@@ -214,6 +269,20 @@ router.patch('/:id/status', verifyToken, async (req, res) => {
         user: { select: { name: true, email: true } }
       }
     });
+    
+    // Send status update email only if status actually changed
+    if (oldStatus !== status) {
+      try {
+        await emailService.sendEmail({
+          to: order.user.email,
+          subject: orderStatusUpdateEmail(order.user.name, order.orderNumber, oldStatus, status).subject,
+          html: orderStatusUpdateEmail(order.user.name, order.orderNumber, oldStatus, status).html
+        });
+        console.log(`Status update email sent to ${order.user.email} for order ${order.orderNumber}`);
+      } catch (emailError) {
+        console.error('Failed to send status update email:', emailError.message);
+      }
+    }
     
     res.json({ success: true, order });
   } catch (error) {

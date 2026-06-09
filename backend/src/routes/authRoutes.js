@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const { createAuditLog } = require('../utils/auditLogger');
+const emailService = require('../services/emailService');
+const { welcomeEmail, loginNotificationEmail } = require('../services/emailTemplates');
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -57,7 +59,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login
+// Login (Neon - Admin/Employee/Customer with email/password)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -99,6 +101,20 @@ router.post('/login', async (req, res) => {
       req.ip,
       req.headers['user-agent']
     );
+    
+    // Send login notification email
+    try {
+      const now = new Date();
+      const formattedTime = now.toLocaleString('en-ZA');
+      await emailService.sendEmail({
+        to: user.email,
+        subject: loginNotificationEmail(user.name, formattedTime, req.ip || 'Unknown').subject,
+        html: loginNotificationEmail(user.name, formattedTime, req.ip || 'Unknown').html
+      });
+      console.log(`Login notification email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error('Failed to send login notification email:', emailError.message);
+    }
     
     res.json({
       success: true,
@@ -249,7 +265,7 @@ router.get('/admin/customers', async (req, res) => {
   }
 });
 
-// ============ FIREBASE SYNC ENDPOINT (ADD THIS) ============
+// ============ FIREBASE SYNC ENDPOINT ============
 router.post('/firebase-sync', async (req, res) => {
   try {
     const { uid, email, name, photoURL, provider } = req.body;
@@ -268,7 +284,10 @@ router.post('/firebase-sync', async (req, res) => {
       }
     });
     
+    let isNewUser = false;
+    
     if (user) {
+      // Existing user - update last login
       if (!user.firebaseUid) {
         user = await prisma.user.update({
           where: { id: user.id },
@@ -292,7 +311,23 @@ router.post('/firebase-sync', async (req, res) => {
         req.ip,
         req.headers['user-agent']
       );
+      
+      // Send login notification email for existing user
+      try {
+        const now = new Date();
+        const formattedTime = now.toLocaleString('en-ZA');
+        await emailService.sendEmail({
+          to: user.email,
+          subject: loginNotificationEmail(user.name, formattedTime, req.ip || 'Unknown').subject,
+          html: loginNotificationEmail(user.name, formattedTime, req.ip || 'Unknown').html
+        });
+        console.log(`Login notification email sent to ${user.email}`);
+      } catch (emailError) {
+        console.error('Failed to send login notification email:', emailError.message);
+      }
     } else {
+      // New user - create account
+      isNewUser = true;
       user = await prisma.user.create({
         data: {
           firebaseUid: uid,
@@ -313,6 +348,18 @@ router.post('/firebase-sync', async (req, res) => {
         req.ip,
         req.headers['user-agent']
       );
+      
+      // Send welcome email for new user
+      try {
+        await emailService.sendEmail({
+          to: user.email,
+          subject: welcomeEmail(user.name).subject,
+          html: welcomeEmail(user.name).html
+        });
+        console.log(`Welcome email sent to ${user.email}`);
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError.message);
+      }
     }
     
     const token = jwt.sign(
