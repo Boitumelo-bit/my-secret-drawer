@@ -1,31 +1,39 @@
-const nodemailer = require('nodemailer');
-
 class EmailService {
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp-relay.brevo.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'boitumelomosiuoa2002@gmail.com',
-        pass: process.env.BREVO_API_KEY
-      }
-    });
+    this.apiKey = process.env.BREVO_API_KEY;
     this.senderEmail = 'boitumelomosiuoa2002@gmail.com';
     this.senderName = process.env.STORE_NAME || 'My Secret Drawer';
-    console.log('Brevo SMTP service ready');
+    console.log('Brevo API service ready');
   }
 
   async sendEmail({ to, subject, html }) {
     try {
-      const info = await this.transporter.sendMail({
-        from: `"${this.senderName}" <${this.senderEmail}>`,
-        to: to,
-        subject: subject,
-        html: html
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': this.apiKey
+        },
+        body: JSON.stringify({
+          sender: {
+            name: this.senderName,
+            email: this.senderEmail
+          },
+          to: [{ email: to }],
+          subject: subject,
+          htmlContent: html
+        })
       });
-      console.log(`✅ Email sent to ${to}`);
-      return { success: true, data: info };
+
+      if (response.ok) {
+        console.log(`✅ Email sent to ${to}`);
+        return { success: true };
+      } else {
+        const error = await response.json();
+        console.error('❌ Email error:', error.message);
+        return { success: false, error: error.message };
+      }
     } catch (error) {
       console.error('❌ Email error:', error.message);
       return { success: false, error: error.message };
