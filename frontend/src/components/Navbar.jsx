@@ -311,7 +311,7 @@ const Navbar = () => {
               {/* User Menu - CONDITIONALLY SHOWN: NOT for customers */}
               {/* For customers, the profile icon is REMOVED */}
               {isAuthenticated ? (
-                !isCustomer && (
+                 (
                   <div className="relative group">
                     <button className="flex items-center gap-1 text-[#1A1A1A] hover:text-[#FF1493] transition-all duration-200 p-1.5 rounded-full hover:bg-pink-50 active:scale-95">
                       {getDropdownIcon()}
