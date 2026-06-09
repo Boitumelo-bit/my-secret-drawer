@@ -160,7 +160,7 @@ const Navbar = () => {
   const navLinks = getNavLinks();
   const dropdownItems = getDropdownItems();
   const showCart = isCustomer;
-  const showWishlist = isCustomer;
+  const showWishlist = false;  // Remove wishlist icon completely from navbar
   const showShoppingFeatures = isCustomer;
 
   const isActive = (path) => location.pathname === path;
