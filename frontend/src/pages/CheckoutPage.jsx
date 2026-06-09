@@ -8,9 +8,7 @@ import {
   MapPinIcon, 
   CreditCardIcon, 
   BanknotesIcon,
-  BuildingOfficeIcon,
   DevicePhoneMobileIcon,
-  GlobeAltIcon,
   ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -91,10 +89,10 @@ const CheckoutPage = () => {
 
     setLoading(true);
     
+    // Show fake payment processing message for mobile money
     if (paymentMethod === 'MPESA' || paymentMethod === 'ECOCASH') {
       toast.loading(`Processing ${paymentMethod} payment...`, { duration: 2000 });
       await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success(`${paymentMethod} payment successful!`);
     }
     
     const orderData = {
@@ -128,8 +126,9 @@ const CheckoutPage = () => {
     
     if (newOrder) {
       clearCart();
-      toast.success(`Order #${newOrder.orderNumber} placed successfully!`);
-      navigate('/orders');
+      // FORCE redirect to orders page using window.location
+      window.location.href = '/orders';
+      return;
     }
     
     setLoading(false);
@@ -149,7 +148,7 @@ const CheckoutPage = () => {
         <div className="container mx-auto px-3 sm:px-4 text-center">
           <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 max-w-md mx-auto">
             <ShoppingBagIcon className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4" />
-            <h1 className="text-xl sm:text-2xl font-playfair font-bold text-darkPlum mb-3 sm:mb-4">Your Cart is Empty</h1>
+            <h1 className="text-xl sm:text-2xl font-playfair font-bold text-gray-800 mb-3 sm:mb-4">Your Cart is Empty</h1>
             <p className="text-gray-600 text-sm sm:text-base mb-6 sm:mb-8">Add items to your cart before checking out.</p>
             <Link to="/products" className="bg-gradient-to-r from-pink-500 to-pink-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full font-semibold hover:shadow-lg transition inline-block text-sm sm:text-base">Continue Shopping</Link>
           </div>

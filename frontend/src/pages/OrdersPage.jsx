@@ -6,8 +6,8 @@ import { ShoppingBagIcon, TruckIcon, CheckCircleIcon, ClockIcon, XCircleIcon, St
 import toast from 'react-hot-toast';
 
 const OrdersPage = () => {
-  const { isAuthenticated, token } = useAuth();
-  const { orders, loading } = useOrders();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { orders, loading: ordersLoading } = useOrders();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -15,6 +15,15 @@ const OrdersPage = () => {
   const [reviewTitle, setReviewTitle] = useState('');
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Show loading while checking authentication or fetching orders
+  if (authLoading || ordersLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20 sm:pt-24">
+        <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -27,14 +36,6 @@ const OrdersPage = () => {
             <Link to="/login" className="bg-[#FF1493] text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-full font-semibold hover:bg-[#FF69B4] transition inline-block text-sm sm:text-base">Sign In</Link>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center pt-20 sm:pt-24">
-        <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -96,7 +97,7 @@ const OrdersPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           productId: selectedProduct.id,
