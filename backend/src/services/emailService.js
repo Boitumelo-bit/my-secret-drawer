@@ -7,6 +7,22 @@ class EmailService {
   }
 
   async sendEmail({ to, subject, html }) {
+    // Validate required fields
+    if (!to) {
+      console.error('❌ Email error: No recipient provided');
+      return { success: false, error: 'No recipient' };
+    }
+    
+    if (!subject) {
+      console.error('❌ Email error: No subject provided for', to);
+      // Use default subject instead of failing
+      subject = 'Message from My Secret Drawer';
+    }
+    
+    if (!html) {
+      html = '<p>Thank you for being a valued customer.</p>';
+    }
+
     try {
       const response = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
@@ -27,7 +43,7 @@ class EmailService {
       });
 
       if (response.ok) {
-        console.log(`✅ Email sent to ${to}`);
+        console.log(`✅ Email sent to ${to}: ${subject}`);
         return { success: true };
       } else {
         const error = await response.json();
