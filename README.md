@@ -14,9 +14,17 @@ https://github.com/Boitumelo-bit/my-secret-drawer
 
 My Secret Drawer is a modern full-stack e-commerce platform developed to provide a premium online shopping experience for fashion and beauty products.
 
-The platform allows customers to browse products, manage shopping carts, save products to a wishlist, securely authenticate, place orders, track deliveries, and manage their accounts. It also provides dedicated dashboards for employees and administrators to efficiently manage products, orders, customers, analytics, and system settings.
+The platform enables customers to browse products, manage shopping carts, save products to wishlists, securely authenticate, place orders, track deliveries, and manage their accounts.
 
-The application follows a modern client-server architecture using React.js for the frontend, Express.js for the backend, Prisma ORM for database management, and PostgreSQL hosted on Neon.
+The system also provides dedicated dashboards for employees and administrators, allowing efficient management of products, inventory, customers, orders, analytics, reviews, refunds, and system settings.
+
+The application follows a modern client-server architecture using:
+
+- React.js for the frontend
+- Express.js and Node.js for backend services
+- Prisma ORM for database management
+- PostgreSQL hosted on Neon Database
+
 
 ---
 
@@ -24,24 +32,25 @@ The application follows a modern client-server architecture using React.js for t
 
 - Fully responsive design
 - Mobile-first user interface
-- Firebase Authentication
-- Email & Password authentication
+- Firebase Authentication integration
+- Email and Password authentication
 - Google Sign-In
 - Facebook Sign-In
-- JWT Authorization
+- JWT authorization
 - Role-based access control
-- Customer Dashboard
-- Employee Dashboard
-- Administrator Dashboard
-- Shopping Cart
-- Wishlist
-- Order Tracking
-- Product Reviews
-- Email Notifications
-- RESTful API
-- PostgreSQL Database
-- Cloudinary Image Storage
-- Vercel Deployment
+- Customer dashboard
+- Employee dashboard
+- Administrator dashboard
+- Shopping cart system
+- Wishlist functionality
+- Product reviews and ratings
+- Order tracking
+- Email notifications
+- RESTful API architecture
+- PostgreSQL database
+- Cloudinary image management
+- Vercel deployment
+
 
 ---
 
@@ -49,28 +58,25 @@ The application follows a modern client-server architecture using React.js for t
 
 ## Customer Features
 
-- User registration
-- Secure login
-- Firebase Authentication
-- Google Sign-In
-- Facebook Sign-In
-- Browse fashion products
-- Browse beauty products
+- User registration and login
+- Firebase authentication
+- Google authentication
+- Facebook authentication
+- Browse fashion and beauty products
 - Product categories
 - Product search
 - Product filtering
-- Product details
-- Multiple product images
-- Product sizes
-- Product colours
-- Shopping cart
-- Wishlist
-- Checkout
+- Product details with images
+- Product sizes and colours
+- Shopping cart management
+- Wishlist management
+- Checkout process
 - Order placement
 - Order tracking
-- Customer account management
+- Account management
 - Product reviews
 - Email notifications
+
 
 ---
 
@@ -83,9 +89,10 @@ The application follows a modern client-server architecture using React.js for t
 - Customer management
 - Banner management
 - Sales monitoring
-- Refund management
+- Refund processing
 - Review moderation
 - Analytics dashboard
+
 
 ---
 
@@ -94,14 +101,14 @@ The application follows a modern client-server architecture using React.js for t
 - Administrator dashboard
 - User management
 - Employee management
-- Customer management
 - Product management
-- Order management
-- Revenue monitoring
-- Analytics
+- Order monitoring
+- Revenue tracking
+- Analytics reports
 - Audit logs
-- System settings
+- System configuration
 - Platform administration
+
 
 ---
 
@@ -119,7 +126,6 @@ The application follows a modern client-server architecture using React.js for t
 - React Hot Toast
 - Firebase Authentication
 
----
 
 ## Backend
 
@@ -130,14 +136,12 @@ The application follows a modern client-server architecture using React.js for t
 - Socket.io
 - Bcrypt
 
----
 
 ## Database
 
 - PostgreSQL
 - Neon Database
 
----
 
 ## Cloud Services
 
@@ -145,39 +149,55 @@ The application follows a modern client-server architecture using React.js for t
 - Cloudinary
 - Firebase
 
+
 ---
 
 # System Architecture
 
-The application follows a modern three-tier architecture.
+The system follows a three-tier architecture.
 
-### Presentation Layer
+## Presentation Layer
+
+Responsible for the user interface and client-side interactions.
+
+Technologies:
 
 - React.js
-- Responsive user interface
+- Tailwind CSS
 - React Router
 - Context API
-- Tailwind CSS
 
-### Business Logic Layer
 
+## Business Logic Layer
+
+Responsible for API processing, authentication, and application logic.
+
+Technologies:
+
+- Node.js
 - Express.js
 - REST API
 - JWT Authentication
 - Firebase Authentication
 - Prisma ORM
 
-### Data Layer
+
+## Data Layer
+
+Responsible for data storage and management.
+
+Technologies:
 
 - PostgreSQL
 - Prisma ORM
 - Neon Database
 
+
 ---
 
 # Database Design
 
-The database contains multiple relational entities including:
+The system contains the following main entities:
 
 - Users
 - Products
@@ -200,43 +220,47 @@ The database contains multiple relational entities including:
 - Search Logs
 - Banners
 
+
 ---
 
 # Authentication and Security
 
-The application provides secure authentication using Firebase Authentication together with JWT authorization.
+My Secret Drawer uses Firebase Authentication together with JWT authorization to provide secure user authentication.
 
-Supported authentication methods include:
+Supported authentication methods:
 
-- Email & Password Authentication
+- Email and Password Authentication
 - Google Sign-In
 - Facebook Sign-In
 
-Security features include:
+
+Security features:
 
 - Firebase Authentication
-- JWT Authentication
+- JWT-based authorization
 - Password hashing using bcrypt
-- Role-based access control
 - Protected routes
+- Role-based access control
 - Secure REST APIs
-- User session validation
+- Session validation
 - Audit logging
+
 
 ---
 
 # Responsive Design
 
-My Secret Drawer follows a mobile-first design approach.
+My Secret Drawer follows a mobile-first responsive design approach.
 
-The application is fully responsive and automatically adapts to different screen sizes including:
+The application is optimized for:
 
 - Mobile phones
 - Tablets
 - Laptops
 - Desktop computers
 
-Responsive layouts have been implemented throughout the application, including:
+
+Responsive layouts have been implemented across:
 
 - Homepage
 - Product pages
@@ -246,7 +270,119 @@ Responsive layouts have been implemented throughout the application, including:
 - Employee dashboard
 - Administrator dashboard
 
-The interface automatically adjusts navigation, grids, forms, images, and dashboards to provide a consistent user experience across all devices.
+
+The interface automatically adapts navigation menus, product grids, forms, images, and dashboards according to screen size.
+
+
+---
+
+# Screenshots
+
+## Customer Interface
+
+### Homepage
+
+![Homepage](screenshots/home.png)
+
+
+### Product Browsing
+
+![Shop Page](screenshots/shop.png)
+
+
+### Product Details
+
+![Product Details](screenshots/product%20detail%20.png)
+
+
+### Shopping Cart
+
+![Cart](screenshots/cartpage.pgn.png)
+
+
+### Checkout
+
+![Checkout](screenshots/checkout.pgn.jpeg)
+
+
+### Customer Dashboard
+
+![Customer Dashboard](screenshots/customerdashboard.png)
+
+
+
+---
+
+# Mobile Responsive Views
+
+The platform provides a responsive experience across mobile devices.
+
+### Mobile Shopping Cart
+
+![Mobile Cart](screenshots/cartpage.pgn(mobile%20view).png)
+
+
+### Mobile Orders
+
+![Mobile Orders](screenshots/orderpage(mobileview).jpeg)
+
+
+### Mobile Employee Dashboard
+
+![Mobile Employee Dashboard](screenshots/mobile(employeedashboard).jpeg)
+
+
+### Mobile User Management
+
+![Mobile User Management](screenshots/manageusers(mobile%20view).png)
+
+
+---
+
+# Employee Dashboard Screenshots
+
+### Employee Dashboard
+
+![Employee Dashboard](screenshots/employeedashboard.jpeg)
+
+
+### Inventory Management
+
+![Inventory Management](screenshots/inventorymanagement(employee).jpeg)
+
+
+### Order Management
+
+![Employee Orders](screenshots/orders(employee).jpeg)
+
+
+
+---
+
+# Administrator Dashboard Screenshots
+
+### Administrator Dashboard
+
+![Admin Dashboard](screenshots/Admindashboard.jpeg)
+
+
+### User Management
+
+![User Management](screenshots/manageusers.png)
+
+
+### Analytics
+
+![Analytics](screenshots/storeanalytics.pgn.jpeg)
+
+
+### Audit Logs
+
+![Audit Logs](screenshots/auditlogs.jpeg)
+
+
+
+---
 
 # Installation and Setup
 
@@ -254,205 +390,5 @@ The interface automatically adjusts navigation, grids, forms, images, and dashbo
 
 ```bash
 git clone https://github.com/Boitumelo-bit/my-secret-drawer.git
-```
 
-Navigate into the project directory.
-
-```bash
 cd my-secret-drawer
-```
-
----
-
-# Backend Setup
-
-Navigate to the backend folder.
-
-```bash
-cd backend
-```
-
-Install dependencies.
-
-```bash
-npm install
-```
-
-Create a `.env` file.
-
-```env
-DATABASE_URL=your_database_url
-JWT_SECRET=your_jwt_secret
-PORT=5000
-FRONTEND_URL=http://localhost:5173
-```
-
-Generate the Prisma client.
-
-```bash
-npx prisma generate
-```
-
-Run database migrations.
-
-```bash
-npx prisma migrate dev
-```
-
-Start the backend server.
-
-```bash
-npm run dev
-```
-
----
-
-# Frontend Setup
-
-Navigate to the frontend folder.
-
-```bash
-cd frontend
-```
-
-Install dependencies.
-
-```bash
-npm install
-```
-
-Create a `.env` file.
-
-```env
-VITE_API_URL=http://localhost:5000
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
-
-Start the development server.
-
-```bash
-npm run dev
-```
-
----
-
-# API Overview
-
-## Authentication
-
-```
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/firebase-sync
-GET  /api/auth/me
-PUT  /api/auth/profile
-```
-
----
-
-## Products
-
-```
-GET /api/products
-GET /api/products/:id
-```
-
----
-
-## Shopping Cart
-
-```
-GET    /api/cart
-POST   /api/cart/add
-PUT    /api/cart/update/:cartItemId
-DELETE /api/cart/remove/:cartItemId
-DELETE /api/cart/clear
-```
-
----
-
-## Wishlist
-
-```
-GET /api/wishlist
-POST /api/wishlist
-DELETE /api/wishlist/:id
-```
-
----
-
-## Orders
-
-```
-POST  /api/orders
-GET   /api/orders/my-orders
-GET   /api/orders/all
-GET   /api/orders/track/:orderNumber
-PATCH /api/orders/:id/status
-```
-
----
-
-## Dashboard
-
-```
-GET /api/dashboard/customer
-GET /api/dashboard/employee
-GET /api/dashboard/admin
-```
-
----
-
-# Deployment
-
-## Frontend
-
-- Vercel
-
-## Backend
-
-- Node.js server
-
-## Database
-
-- Neon PostgreSQL
-
----
-
-# Future Improvements
-
-Possible future enhancements include:
-
-- Lesotho payment gateway integration
-- PayFast integration
-- Mobile Money payments
-- Push notifications
-- AI product recommendations
-- Live chat support
-- Multi-language support
-- Advanced reporting
-- Native mobile application
-
----
-
-# Developer
-
-**Boitumelo Mosiuoa**
-
-Diploma in Information Technology
-
-Limkokwing University of Creative Technology
-
-GitHub:
-https://github.com/Boitumelo-bit
-
----
-
-# License
-
-This project was developed for educational and portfolio purposes.
